@@ -16,10 +16,6 @@ RUN apt-get -q update &&\
     sed -i 's|session    required     pam_loginuid.so|session    optional     pam_loginuid.so|g' /etc/pam.d/sshd &&\
     mkdir -p /var/run/sshd
 
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
-
 # Install JDK 7 (latest edition)
 RUN apt-get -q update &&\
     DEBIAN_FRONTEND="noninteractive" apt-get -q install -y -o Dpkg::Options::="--force-confnew"  --no-install-recommends openjdk-7-jre-headless &&\
@@ -28,6 +24,14 @@ RUN apt-get -q update &&\
 # Set user jenkins to the image
 RUN useradd -m -d /home/jenkins -s /bin/sh jenkins &&\
     echo "jenkins:jenkins" | chpasswd
+
+COPY shared/sources.list /etc/apt/
+
+# fix locales shit, EVER !
+COPY shared/locale.gen /etc/
+RUN apt-get update &&  \
+    DEBIAN_FRONTEND="noninteractive" apt-get -q install -y -o Dpkg::Options::="--force-confnew"  --no-install-recommends locales &&\
+    locale-gen
 
 # Standard SSH port
 EXPOSE 22
