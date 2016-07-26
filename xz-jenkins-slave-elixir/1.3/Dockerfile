@@ -31,13 +31,14 @@ RUN apt-get -q clean -y && rm -rf /var/lib/apt/lists/* && rm -f /var/cache/apt/*
 
 COPY shared/sources.list /etc/apt/
 
+USER jenkins
 # install Elixir Hex
 RUN mix local.hex --force
 # install Rebar
-RUN mix local.rebar
+RUN mix local.rebar --force
 
+USER root
 # Standard SSH port
 EXPOSE 22
-
 # Default command
 CMD ["/usr/sbin/sshd", "-D"]
