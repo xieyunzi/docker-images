@@ -22,6 +22,14 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get -q install -y -o Dpkg::Options::="-
 RUN useradd -m -d /home/jenkins -s /bin/sh jenkins &&\
     echo "jenkins:jenkins" | chpasswd
 
+# sudoer group
+RUN groupadd sudoer
+RUN usermod -a -G sudoer jenkins
+
+# install sudo
+RUN apt-get install sudo
+RUN echo '%sudoer ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
 # fix locales shit, EVER !
 COPY shared/locale.gen /etc/
 RUN DEBIAN_FRONTEND="noninteractive" apt-get -q install -y -o Dpkg::Options::="--force-confnew"  --no-install-recommends locales &&\
@@ -32,6 +40,8 @@ RUN apt-get -q clean -y && rm -rf /var/lib/apt/lists/* && rm -f /var/cache/apt/*
 COPY shared/sources.list /etc/apt/
 
 USER jenkins
+
+RUN sudo locale-gen
 # install Elixir Hex
 RUN mix local.hex --force
 # install Rebar
