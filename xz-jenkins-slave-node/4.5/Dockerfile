@@ -1,6 +1,8 @@
 # This Dockerfile is used to build an image containing basic stuff to be used as a Jenkins slave build node.
-FROM xz-otp-18-elixir:1.3
+FROM node:4.5
 MAINTAINER xieyunzi <xieyunzi@foxmail.com>
+
+COPY shared/sources.list /etc/apt/
 
 # In case you need proxy
 #RUN echo 'Acquire::http::Proxy "http://127.0.0.1:8080";' >> /etc/apt/apt.conf
@@ -39,17 +41,11 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
+# use cnpm
+RUN npm install -g cnpm --registry=https://registry.npm.taobao.org
+
 RUN apt-get -q clean -y && rm -rf /var/lib/apt/lists/* && rm -f /var/cache/apt/*.bin
 
-COPY shared/sources.list /etc/apt/
-
-USER jenkins
-# install Elixir Hex
-RUN mix local.hex --force
-# install Rebar
-RUN mix local.rebar --force
-
-USER root
 # Standard SSH port
 EXPOSE 22
 # Default command
