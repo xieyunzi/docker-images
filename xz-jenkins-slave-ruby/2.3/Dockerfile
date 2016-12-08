@@ -1,10 +1,11 @@
 # This Dockerfile is used to build an image containing basic stuff to be used as a Jenkins slave build node.
-FROM xz-otp-18-elixir:1.3
+FROM ruby:2.3
 MAINTAINER xieyunzi <xieyunzi@foxmail.com>
 
-COPY shared/sources.list /etc/apt/
 # In case you need proxy
 #RUN echo 'Acquire::http::Proxy "http://127.0.0.1:8080";' >> /etc/apt/apt.conf
+
+COPY shared/sources.list /etc/apt/
 
 # Upgrade packages on image
 # Preparations for sshd
@@ -17,7 +18,7 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get -q install -y -o Dpkg::Options::="-
     mkdir -p /var/run/sshd
 
 # Install JDK 8
-RUN DEBIAN_FRONTEND="noninteractive" apt-get -q install -y -o Dpkg::Options::="--force-confnew"  --no-install-recommends openjdk-8-jre-headless
+# RUN DEBIAN_FRONTEND="noninteractive" apt-get -q install -y -o Dpkg::Options::="--force-confnew"  --no-install-recommends openjdk-8-jre-headless
 
 # Set user jenkins to the image
 RUN useradd -m -d /home/jenkins -s /bin/sh jenkins &&\
@@ -40,15 +41,13 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
+# install ruby dependencies
+RUN DEBIAN_FRONTEND="noninteractive" apt-get -q install -y -o Dpkg::Options::="--force-confnew"  --no-install-recommends libmysqlclient-dev mysql-client
+# user https://gems.ruby-china.org/
+RUN gem sources --add https://gems.ruby-china.org/ --remove https://rubygems.org/
+RUN bundle config mirror.https://rubygems.org https://gems.ruby-china.org
+
 RUN apt-get -q clean -y && rm -rf /var/lib/apt/lists/* && rm -f /var/cache/apt/*.bin
-
-COPY shared/sources.list /etc/apt/
-
-USER jenkins
-# install Elixir Hex
-RUN mix local.hex --force
-# install Rebar
-RUN mix local.rebar --force
 
 USER root
 # Standard SSH port
