@@ -33,7 +33,7 @@ RUN apt-get install sudo
 RUN echo '%sudoer ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
 # fix locales shit, EVER !
-COPY shared/locale.gen /etc/
+RUN echo "en_US.UTF-8 UTF-8\nzh_CN.UTF-8 UTF-8" >> /etc/locale.gen
 RUN DEBIAN_FRONTEND="noninteractive" apt-get -q install -y -o Dpkg::Options::="--force-confnew"  --no-install-recommends locales
 # Set the locale
 RUN locale-gen en_US.UTF-8
@@ -43,6 +43,10 @@ ENV LC_ALL en_US.UTF-8
 
 # use cnpm
 RUN npm install -g cnpm --registry=https://registry.npm.taobao.org
+RUN npm install -g yarn --registry=https://registry.npm.taobao.org
+
+# proxy anything ! thanks great wall
+RUN DEBIAN_FRONTEND="noninteractive" apt-get -q install -y -o Dpkg::Options::="--force-confnew"  --no-install-recommends proxychains
 
 RUN apt-get -q clean -y && rm -rf /var/lib/apt/lists/* && rm -f /var/cache/apt/*.bin
 

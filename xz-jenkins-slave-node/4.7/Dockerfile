@@ -1,8 +1,9 @@
 # This Dockerfile is used to build an image containing basic stuff to be used as a Jenkins slave build node.
-FROM xz-otp-18-elixir:1.3
+FROM node:4.7
 MAINTAINER xieyunzi <xieyunzi@foxmail.com>
 
 COPY shared/sources.list /etc/apt/
+
 # In case you need proxy
 #RUN echo 'Acquire::http::Proxy "http://127.0.0.1:8080";' >> /etc/apt/apt.conf
 
@@ -32,7 +33,7 @@ RUN apt-get install sudo
 RUN echo '%sudoer ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
 # fix locales shit, EVER !
-COPY shared/locale.gen /etc/
+RUN echo "en_US.UTF-8 UTF-8\nzh_CN.UTF-8 UTF-8" >> /etc/locale.gen
 RUN DEBIAN_FRONTEND="noninteractive" apt-get -q install -y -o Dpkg::Options::="--force-confnew"  --no-install-recommends locales
 # Set the locale
 RUN locale-gen en_US.UTF-8
@@ -40,20 +41,15 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
+# use cnpm
+RUN npm install -g cnpm --registry=https://registry.npm.taobao.org
+RUN npm install -g yarn --registry=https://registry.npm.taobao.org
+
 # proxy anything ! thanks great wall
 RUN DEBIAN_FRONTEND="noninteractive" apt-get -q install -y -o Dpkg::Options::="--force-confnew"  --no-install-recommends proxychains
 
 RUN apt-get -q clean -y && rm -rf /var/lib/apt/lists/* && rm -f /var/cache/apt/*.bin
 
-COPY shared/sources.list /etc/apt/
-
-USER jenkins
-# install Elixir Hex
-RUN mix local.hex --force
-# install Rebar
-RUN mix local.rebar --force
-
-USER root
 # Standard SSH port
 EXPOSE 22
 # Default command

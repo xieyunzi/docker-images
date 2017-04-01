@@ -47,6 +47,9 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get -q install -y -o Dpkg::Options::="-
 RUN gem sources --add https://gems.ruby-china.org/ --remove https://rubygems.org/
 RUN bundle config mirror.https://rubygems.org https://gems.ruby-china.org
 
+# proxy anything ! thanks great wall
+RUN DEBIAN_FRONTEND="noninteractive" apt-get -q install -y -o Dpkg::Options::="--force-confnew"  --no-install-recommends proxychains
+
 RUN apt-get -q clean -y && rm -rf /var/lib/apt/lists/* && rm -f /var/cache/apt/*.bin
 
 USER root

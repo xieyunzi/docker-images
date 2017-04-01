@@ -44,6 +44,9 @@ ENV LC_ALL en_US.UTF-8
 # use cnpm
 RUN npm install -g cnpm --registry=https://registry.npm.taobao.org
 
+# proxy anything ! thanks great wall
+RUN DEBIAN_FRONTEND="noninteractive" apt-get -q install -y -o Dpkg::Options::="--force-confnew"  --no-install-recommends proxychains
+
 RUN apt-get -q clean -y && rm -rf /var/lib/apt/lists/* && rm -f /var/cache/apt/*.bin
 
 # Standard SSH port
